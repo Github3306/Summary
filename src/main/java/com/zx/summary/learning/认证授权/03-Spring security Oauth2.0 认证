@@ -33,21 +33,34 @@ Oauth协议：https://tools.ietf.org/html/rfc6749
    2.隐式授权模式（Implicit）
    3.密码模式（Resource Owner Password Credentials）  常用
    4.客户端模式（Client Credentials）
-4：授权码授权实现
-   1、客户端请求第三方授权
 
-   2、用户(资源拥有者)同意给客户端授权
+   1>  授权码授权实现
+       1、客户端请求第三方授权
 
-   3、客户端获取到授权码，请求认证服务器申请 令牌
+       2、用户(资源拥有者)同意给客户端授权
 
-   4、认证服务器向客户端响应令牌
+       3、客户端获取到授权码，请求认证服务器申请 令牌
 
-   5、客户端请求资源服务器的资源，资源服务校验令牌合法性，完成授权
+       4、认证服务器向客户端响应令牌
 
-   6、资源服务器返回受保护资源
+       5、客户端请求资源服务器的资源，资源服务校验令牌合法性，完成授权
 
+       6、资源服务器返回受保护资源
 
+       步骤
+           **(1)申请授权码**
+           请求认证服务获取授权码：
+           ```
+           Get请求：
+           http://localhost:9001/oauth/authorize?client_id=changgou&response_type=code&scop=app&redirect_uri=http://localhost
+           ```
+           参数列表如下：
+           client_id：客户端id，和授权配置类中设置的客户端id一致。
+           response_type：授权码模式固定为code
+           scop：客户端范围，和授权配置类中设置的scop一致。
+           redirect_uri：跳转uri，当授权码申请成功后会跳转到此地址，并在后边带上code参数（授权码）
 
+   2>  密码授权模式
 
 
 
