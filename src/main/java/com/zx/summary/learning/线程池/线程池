@@ -1,0 +1,118 @@
+======================================================线程池============================================================
+
+     =======================================================================================================
+                newSingleThreadExecutor：单线程池，同时只有一个线程在跑。
+                newCachedThreadPool() ：回收型线程池，可以重复利用之前创建过的线程，运行线程最大数是Integer.MAX_VALUE。
+                newFixedThreadPool() ：固定大小的线程池，跟回收型线程池类似，只是可以限制同时运行的线程数量
+                ScheduledExecutorService：最大优点除了线程池的特性以外，可以实现循环或延迟任务
+     ===================================================================================================================
+
+
+1：ScheduledExecutorService:
+   ScheduledExecutorService（java.util.concurrent并发包引进）
+   创建线程池，通过线程池的方式来执行任务。
+   private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+   private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(10);
+   (1)设计思想：
+       ScheduledExecutorService,是基于线程池设计的定时任务类,每个调度任务都会分配到线程池中的一个线程去执行,也就是说,任务是并发执行,互不影响;
+       需要注意,只有当调度任务来的时候,ScheduledExecutorService才会真正启动一个线程,其余时间ScheduledExecutorService都是出于轮询任务的状态;
+     1.1>线程任务：
+        class MyScheduledExecutor implements Runnable {
+            private String jobName;
+            MyScheduledExecutor() {
+            }
+
+            MyScheduledExecutor(String jobName) {
+                this.jobName = jobName;
+            }
+            @Override
+            public void run() {
+
+                System.out.println(jobName + " is running");
+            }
+        }
+     1.2>定时任务
+        public static void main(String[] args) {ExtInfoRetry
+            ScheduledExecutorService service = Executors.newScheduledThreadPool(10);
+            long initialDelay = 1;
+            long period = 1;
+            // 从现在开始1秒钟之后，每隔1秒钟执行一次job1
+            service.scheduleAtFixedRate(new MyScheduledExecutor("job1"), initialDelay, period, TimeUnit.SECONDS);
+            // 从现在开始2秒钟之后，每隔2秒钟执行一次job2
+            //定时任务启动(延时时间后周期执行)
+            service.scheduleWithFixedDelay(new MyScheduledExecutor("job2"), initialDelay, period, TimeUnit.SECONDS);
+        }
+        参数解读：
+           initialDelay：第一次执行任务的延时时间   定时任务延时启动
+           period：周期执行的时间间隔              定时任务时间间隔
+           TimeUnit：java.util.concurrent包下面的一个类，表示给定单元粒度的时间段
+             主要作用：
+                 时间颗粒度转换
+                 延时
+
+   (2)ScheduledExecutorService 中两种最常用的调度方法 ScheduleAtFixedRate 和 ScheduleWithFixedDelay。
+     2.1>ScheduleAtFixedRate 每次执行时间为上一次任务开始起向后推一个时间间隔，即每次执行时间为 :initialDelay, initialDelay+period, initialDelay+2*period, …；
+
+     2.2>ScheduleWithFixedDelay 每次执行时间为上一次任务结束起向后推一个时间间隔，
+         即每次执行时间为：initialDelay, initialDelay+executeTime+delay, initialDelay+2*executeTime+2*delay。
+     由此可见，ScheduleAtFixedRate 是基于固定时间间隔进行任务调度，ScheduleWithFixedDelay 取决于每次任务执行的时间长短，是基于不固定时间间隔进行任务调度
+
+
+
+
+
+
+2：ScheduledExecutorService 和 Timer 的区别
+   (1)Timer的内部只有一个线程，如果有多个任务的话就会顺序执行，这样我们的延迟时间和循环时间就会出现问题;
+   (2)ScheduledExecutorService是线程池，所以就不会出现这个情况，在对延迟任务和循环任务要求严格的时候，就需要考虑使用ScheduledExecutorService了;
+
+        ScheduledExecutorService的用法主要有三个：
+        public class MainActivity extends AppCompatActivity {
+
+            // 通过静态方法创建ScheduledExecutorService的实例
+            private ScheduledExecutorService mScheduledExecutorService = Executors.newScheduledThreadPool(4);
+
+            @Override
+            protected void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+                setContentView(R.layout.activity_main);
+
+                // 延时任务
+                mScheduledExecutorService.schedule(threadFactory.newThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.e("lzp", "first task");
+                    }
+                }), 1, TimeUnit.SECONDS);
+
+                // 循环任务，按照上一次任务的发起时间计算下一次任务的开始时间
+                mScheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.e("lzp", "first:" + System.currentTimeMillis() / 1000);
+                        try {
+                            Thread.sleep(3000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, 1, 1, TimeUnit.SECONDS);
+
+                // 循环任务，以上一次任务的结束时间计算下一次任务的开始时间
+                mScheduledExecutorService.scheduleWithFixedDelay(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.e("lzp", "scheduleWithFixedDelay:" + System.currentTimeMillis() / 1000);
+                        try {
+                            Thread.sleep(3000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, 1, 1, TimeUnit.SECONDS);
+
+
+            }
+        }
+    scheduleAtFixedRate：
+      从log上看，我们的循环任务严格按照每一秒发起一次，sleep（3000）对于任务的开启是没有影响的，也就是以上一个任务的开始时间 + 延迟时间 = 下一个任务的开始时间。
