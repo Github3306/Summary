@@ -1,0 +1,126 @@
+======================================================常用的流操作========================================================
+
+参考：https://blog.csdn.net/aizhupo1314/article/details/83502803
+
+1> 流主要针对集合相关的操作，所有继承自Collection的接口都可以使用流
+
+2>根据操作返回结果不同，我们大致进行一下分类，也就是返回stream的就是中间操作，其他的，返回具体对象的就是最终操作：
+
+3>中间操作：
+  3.1>filter()： 对元素进行过滤
+      Lambda表达式格式就是a -> b ，其中a表示入参，b表示函数体，这一块大家可以花点时间去看看，虽然比较基础，但是还是要理解的。而它返回的，还是一个Stream，我们可以继续对它进行相关操作
+      @Test
+          public void streamDemo1(){
+              List<Integer> test = Lists.newArrayList(1,2,3,4,5,6,7,8,9,10,11,12);
+              List<Integer> collect = test.stream() //1
+                      .filter(a -> a > 1
+                      	&& a < 10) //2
+                      .collect(Collectors.toList()); //3
+              log.info(collect.toString());
+              log.info(test.toString());
+          }
+
+       第1步，将list转换为Stream，这个时候，stream的数据元应该是Integer，这个也是我们后面Predicate所使用的入参；
+       第2步，调用filter方法，使用Lambda，生成了一个Predicate的实现类，其中a是入参，是一个integer的数据类型，和流中的数据元对应，后面是test方法的方法体，这里是过滤掉的集合中的哪些元素；
+       第3步，把过滤后的元素转换为一个新的集合，后面细讲。
+      一步步来看还是比较好理解的，是不是方便很多。代码也美观很多。在这里，filter之后可以继续进行相关操作，比如：List<Integer> collect = test.stream().filter(a -> a > 1 && a < 10).filter(a -> a < 9).collect(Collectors.toList());
+      然后，我分别打印了前后的集合，大家可以想一下打印出来的test和collect是否相同，都分别是什么呢？这个明白了，基本就能想到底层的原理了。
+
+      同理，map的遍历也是一样，先把map转换为entry的集合，然后生成流，只是这时候元数据是一个
+      entry，map.entrySet().stream().filter(a -> a.getKey()==1 && a.getValue() > 2).collect(Collectors.toMap((a) -> a.getKey(), (a) -> a.getValue()));. 这里a代表的是entry。
+
+  3.2>sorted()：对元素排序
+      我们之前的排序，基本都是new一个Comparator，其重写compare方法，还是很麻烦的，Stream中提供了针对排序的方法，Stream<T> sorted(Comparator<? super T> comparator);传入的是一个Comparator的实现类，大家可能也想到了，Comparator也是一个函数式接口，里面就一个抽象方法int compare(T o1, T o2);调用这个方法，一般都是比较对象的某个属性，这个时候可以用Lambda表达式的方法应用写法，比如：Student::getAge，也就是比较学生的年级进行排序，这里的排序都是自然顺序，也就是正序的，想要倒序，调用reversed方法就ok。
+
+      @Test
+          public void streamDemo1(){
+              List<Student> test = new ArrayList<>();
+              test.add(new Student("aa", 11,15));
+              test.add(new Student("bb", 13,10));
+              test.add(new Student("cc", 13,11));
+              test.add(new Student("dd", 15,20));
+              test.add(new Student("ee", 11,16));
+              List<Student> collect = test.stream().sorted(Comparator.comparing(Student::getAge).thenComparing(Student::getNo)).collect(Collectors.toList());
+              log.info(collect.toString());
+          }
+
+      这里排序，可以继续用thenComparing对排序后的stream再进行排序操作，真心简洁方便。还是和上面一样，这里只是对管道中的流进行了操作，原集合是没有变化的。
+      其实，这里有一种比较简洁的写法，test.sort(Comparator.comparing(Student::getAge).thenComparing(Student::getNo));这个不需要返回，这个直接是对集合进行了处理。大家可以视情况使用，如果处理后不需要原来集合的数据，可以按照这种写法来，比较方便。
+
+  3.3>map()：元素映射
+      这个方法比较简单，一般是用于生成对象中某些属性的新的集合，比如，取学生年龄的集合：
+      List<Integer> collect1 = test.stream().map(Student::getAge).collect(Collectors.toList());
+      然后针对这个集合做分析或者业务之类的
+
+  3.3>distinct()：去除重复的元素
+      也就是去掉集合中的重复元素，这个很简单，直接调用一下就ok，比如：List<Integer> collect1 = test.stream().map(Student::getAge).distinct().collect(Collectors.toList());
+
+4>最终操作：
+  4.1>forEach()：遍历每个元素。
+      这个也是用到很多，很重要的一个方法。涉及到对集合中元素的操作的，都会使用这个方法。void forEach(Consumer<? super T> action);入参是一个Consumer接口，这个接口也是一个函数式接口，他有两个方法，一个是void accept(T t);，一个是andThen的方法，可以理解为入参是流中的数据元，然后调用覆盖的方法，覆盖数据元。因为他是直接更改了六种的数据，也是最终操作，所以，集合的元素是直接改变的。
+
+       @Test
+          public void streamDemo1(){
+              List<Student> test = new ArrayList<>();
+              test.add(new Student("aa", 11,15));
+              test.add(new Student("bb", 13,10));
+              test.add(new Student("cc", 13,11));
+              test.add(new Student("dd", 15,20));
+              test.add(new Student("ee", 11,16));
+              test.stream().forEach(student -> student.setAge(10));
+              log.info(test.toString());
+          }
+
+      这个就是把所有的学生的年龄全部改为了10，直接覆盖了，student 是stream中的数据元，后面就是accept方法的具体实现。
+
+      findFirst，findAny
+      这是判断一个集合中是否有某一个对象的方法，Optional<T> findAny();没有入参，返回的是一个Optional的对象。我们确定是否包含，可以调用Optional.isPresent()方法。
+
+       Optional<Student> any = test.stream().filter(student -> student.getAge() > 10).findAny();
+              if(any.isPresent()){
+                  //表示包含
+              }
+
+      当然，这里有一种简单的写法，就是Optional里面有一个方法是orElse，我们代码可以继续连接：Student student = test.stream().filter(student -> student.getAge() > 10).findAny().orElse(null);这里只需要判断student 是否为null就ok。
+
+      聚合groupingBy方法
+      我们经常会有一些操作，需要将一个List集合中的对象按照某个特定的属性去整合成一个Map<key, Lsit>d的操作，这个时候使用流式编程的聚合方法，就很方便。
+
+              List<MetadataPropertyDO> list = metadataPropertyMapper.getList(new HashMap<>());
+              if (CollectionUtils.isNotEmpty(list)) {
+                  Map<Long, List<MetadataPropertyDO>> collect = list
+                          .stream()
+                          .collect(Collectors.groupingBy(MetadataPropertyDO::getKaId));
+
+      这里有一点要提示一下，如果list中的对象，针对需要映射的key有空值，这里会报element cannot be mapped to a null key这个错误，因为map的key不能是null（这个原因大家也可以去深究一下，有助于理解map底层的结构和相关方法的源码）。所以最好针对需要的key为空的数据使用filter进行一次流式的过滤，代码如下：
+
+              List<MetadataPropertyDO> list = metadataPropertyMapper.getList(new HashMap<>());
+              if (CollectionUtils.isNotEmpty(list)) {
+                  Map<Long, List<MetadataPropertyDO>> collect = list
+                          .stream()
+                          .filter(metadataPropertyDO -> metadataPropertyDO.getKaId() != null)
+                          .collect(Collectors.groupingBy(MetadataPropertyDO::getKaId));
+              }
+
+  findFirst()：找第一个符合要求的元素。
+  reduce()：把Stream 元素组合起来。例如，字符串拼接，数值的 sum，min，max ，average 都是特殊的 reduce。
+  collect()：返回一个新的数据结构，基于Collectors有丰富的处理方法。
+  min()：找到最小值。
+  max()：找到最大值。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
