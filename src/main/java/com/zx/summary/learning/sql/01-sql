@@ -1,0 +1,59 @@
+=================================================== sql ==================================================
+1：union 和 union all 的区别:
+   1.1>UNION 操作符用于合并两个或多个 SELECT 语句的结果集。
+       请注意，UNION 内部的 SELECT 语句必须拥有相同数量的列。列也必须拥有相似的数据类型。同时，每条 SELECT 语句中的列的顺序必须相同。
+       SQL UNION 语法
+           SELECT column_name(s) FROM table_name1
+           UNION
+           SELECT column_name(s) FROM table_name2
+       注释：默认地，UNION 操作符选取不同的值。如果允许重复的值，请使用 UNION ALL。
+   1.2> UNION ALL 语法
+        SELECT column_name(s) FROM table_name1
+        UNION ALL
+        SELECT column_name(s) FROM table_name2
+       另外，UNION 结果集中的列名总是等于 UNION 中第一个 SELECT 语句中的列名。、
+   1.3：区别
+        1.3.1>union 在进行表求并集后会去掉重复的元素，所以会对所产生的结果集进行排序运算，删除重复的记录再返回结果。
+        1.3.2>union all 则只是简单地将两个结果集合并后就返回结果。因此，如果返回的两个结果集中有重复的数据，那么返回的结果就会包含重复的数据。
+        1.3.3>从上面的对比可以看出，在执行查询操作时，union all 要比union 快很多，所以，如果可以确认合并的两个结果集中不包含重复的数据，那么最好使用union all
+
+2：SQL 函数 FIND_IN_SET
+   2.1> FIND_IN_SET(str,strlist)语法解释：
+       2.1.1>参数说明：
+             str: 要查询的字符串参数
+             strlist: 查询参数字段名，该字段名以‘,’分割的形式存储，例：（1,2,3）
+       2.1.2>返回结果：
+             查询strlist是否包含str,如果包含返回该数据，反之则返回null.
+       2.1.3>FIND_IN_SET(str,strlist)应用场景
+             例如：有个表存着userId字符串,查询用户ID为‘1’的用户包含在userId字符串中的数据。这时候就要用FIND_IN_SET(str,strlist)来解决。
+
+               例如写一个测试sql,如下语句：
+               CREATE TABLE `test` (
+               `id` int(8) NOT NULL auto_increment,
+               `userId` varchar(255) NOT NULL,
+               PRIMARY KEY (`id`)
+               )
+               INSERT INTO `test` VALUES (1, '1,2,3');
+               INSERT INTO `test` VALUES (2, '2,3,4');
+               INSERT INTO `test` VALUES (3, '1,7,9');
+
+           查询用户ID为1包含在userId中的数据。
+           SELECT * from test t WHERE FIND_IN_SET(‘1’,t.userId)
+           返回结果如下：
+             id   userId
+             1    1,2,3
+             3    1,7,9
+
+           总结：综合上述是对Find_IN_SET 的语法的一个解释和应用场景说明，注意Find_IN_SET 是精确匹配，字段值以英文”,”分隔。
+
+3：mybatis的escape字段     参考：https://blog.csdn.net/yh869585771/article/details/80276437
+
+
+
+
+
+
+
+
+
+
