@@ -1,0 +1,63 @@
+==================================================apollo================================================================
+参考：  https://blog.csdn.net/qq_39839075/article/details/88856683
+
+ 一、携程apollo优点：
+
+    ①支持配置热更新，而且不需要想springcloud那样需要消息总线来回调通知。
+
+    ②对于接入项目，只需要引client包和@EnableApolloConfig注解即可
+
+    ③与spring整合，在0.10.0之后支持 ${} 格式直接获取数据，并支持热更新
+
+    缺点：1、官方文档经过版本迭代很多赘述地方 2、环境被限定为dev、uat、fat、pro，不能自定义
+
+
+
+二、apollo术语：
+
+    友情提示：portal、admin、client都只需用同一个即可，但是apollo-configservice要不同环境生成不同的（不同环境数据库连接信息不同）。其实也可以通过参数来设置，详细的去看官网。本人是不同环境打不同的包。
+
+    ①portal：可视化页面模块，进行配置文件的实际操作。
+
+    ②meta server：携程写的一个接口，记录apollo-configservice地址
+
+    ③apollo-configservice：提供获取配置信息接口
+
+    ④apollo-client：给项目引用的包，该包还依赖buildtools、core等包，core里包含meta server信息。
+
+    ⑤apollo-admin：portal的服务端。
+
+三、apollo环境为开发环境
+   FAT：测试环境，相当于alpha环境(功能测试)    Alpha测试简介：https://blog.csdn.net/yyg_5106/article/details/83534638
+
+   UAT：集成环境，相当于beat环境(回归测试)     https://blog.csdn.net/wange6906/article/details/79813165
+
+   pro：生产环境
+
+四、apollo maven依赖
+
+        <!-- apollo 携程apollo配置中心框架 -->
+        <dependency>
+            <groupId>com.ctrip.framework.apollo</groupId>
+            <artifactId>apollo-client</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ctrip.framework.apollo</groupId>
+            <artifactId>apollo-core</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+    启动类添加  @EnableApolloConfig  注解
+
+
+
+
+
+
+
+
+
+
+
+
+
