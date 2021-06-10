@@ -1,0 +1,13 @@
+=======================================================================================================================
+synchronized的四种用法： https://www.cnblogs.com/kabi/p/6525992.html
+
+
+
+
+1：synchronized对对象进行加锁，为什么使用new byte[0]？
+    private static byte[] LOCK = new byte[0];
+    synchronized (LOCK) {
+      ……
+    }
+  当没有明确的对象作为锁，只是想让一段代码同步时，能够创建一个特别的instance变量（他得是个对象）来充当锁
+  说明：零长度的byte数组对象创建起来将比任何对象都经济――查看编译后的字节码： 生成零长度的byte[]对象只需3条操作码，而Object lock = new Object()则需要7行操作码。
