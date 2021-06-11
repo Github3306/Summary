@@ -32,7 +32,9 @@
 
    UAT：集成环境，相当于beat环境(回归测试)     https://blog.csdn.net/wange6906/article/details/79813165
 
-   pro：生产环境
+   PRO：生产环境
+
+   DEV：开发环境
 
 四、apollo maven依赖
 
