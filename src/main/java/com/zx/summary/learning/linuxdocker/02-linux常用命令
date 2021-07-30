@@ -1,0 +1,49 @@
+----------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------
+1：vim
+   显示文档行数： ：set nu
+   向一个文件中输入内容：echo "内容" >> 文件路径(echo "1: >> zkdata1/myid)
+   查找：/搜索的关键字
+
+2：查看linux版本信息
+   cat /etc/redhat-release
+
+3：修改主机名：
+   sudo hostnamectl set-hostname <newhostname>
+
+4：设置某个服务开机自启：
+   chkconfig 服务名称 on
+
+5：关闭防火墙
+
+6：ifconfig命令不存在
+   执行 sudo yum install net-tools
+
+7：跨服务器复制文件和文件夹：
+   scp -r /路径 主机地址@主机名:/地址   eg:  scp -r /usr/locak/jdk root@localhost:/usr/local
+
+8：查看文件大小：
+   du -sh *
+
+9：查看端口号
+   netstat -tunple | grep 端口号
+   netstat -apth  查看当前开放的端口
+
+10：查看进程：
+    ps -u  我们可以使用-p指定进程，再使用-f 输出所有信息。例如，通过ps -f -p 33799命令，我们即可得到PID为33799的所有信息
+    ps aux | grep 应用名称  eg:ps aux | grep kubelet
+
+11：配置jdk
+    vim /etc/profile
+    ---------------------
+    export JAVA_HOME=/usr/local/jdk
+    export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+    export PATH=$PATH:$JAVA_HOME/bin
+
+12：执行.sh权限不够
+    执行命令  chmod u+x *.sh
+
+
+
+
+

@@ -1,0 +1,20 @@
+---------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------
+1：使用rmp安装mysql是提示下面错误：
+    错误：依赖检测失败：
+        /usr/bin/perl 被 mysql-community-server-5.7.26-1.el7.x86_64 需要
+        perl(Getopt::Long) 被 mysql-community-server-5.7.26-1.el7.x86_64 需要
+        perl(strict) 被 mysql-community-server-5.7.26-1.el7.x86_64 需要
+ 可能原因：如错误信息显示，缺少net-tools.x86_64，libaio.x86_64，perl.x86_64三个依赖，使用yum安装即可。
+ 搜索：
+     yum search perl
+     yum search libaio
+     yum search net-tools
+ 安装：
+     yum -y install perl.x86_64
+     yum install -y libaio.x86_64
+     yum -y install net-tools.x86_64
+
+
+
+
