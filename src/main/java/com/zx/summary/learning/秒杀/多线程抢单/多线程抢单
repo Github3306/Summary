@@ -1,0 +1,75 @@
+================================================多线程抢单================================================================
+1：实现思路：
+   在审视秒杀中，操作一般都是比较复杂的，而且并发量特别高，比如，检查当前账号操作是否已经秒杀过该商品，检查该账号是否存在存在刷单行为，记录用户操作日志等。
+   下订单这里，我们一般采用多线程下单，但多线程中我们又需要保证用户抢单的公平性，也就是先抢先下单。我MultiThreadingCreateOrder们可以这样实现，用户进入秒杀抢单，如果用户复合抢单资格，只需要记录用户抢单数据，存入队列，多线程从队列中进行消费即可，存入队列采用左压，多线程下单采用右取的方式。
+
+2：异步实现
+   要想使用Spring的异步操作，需要先开启异步操作，用@EnableAsync注解开启，然后在对应的异步方法上添加注解@Async即可。
+   @Component
+   public class MultiThreadingCreateOrder {
+
+       /***
+        * 多线程下单操作
+        */
+       @Async
+       public void createOrder(){
+           try {
+               System.out.println("准备执行....");
+               Thread.sleep(20000);
+               System.out.println("开始执行....");
+           } catch (InterruptedException e) {
+               e.printStackTrace();
+           }
+       }
+   }
+   上面createOrder方法进行了休眠阻塞操作，我们在下单的方法调用createOrder方法，如果下单的方法没有阻塞，继续执行，说明属于异步操作，如果阻塞了，说明没有执行异步操作。
+
+   @Override
+   public boolean add(Long id, String time, String username) {
+
+       /**
+        * username 抢单的用户是谁
+        * status 1  表示抢单的状态 (1.排队中)
+        * id 抢的商品的ID
+        * time :抢的商品的所属时间段
+        */
+       SeckillStatus seckillStatus = new SeckillStatus(username, new Date(),1, id,time);
+
+       //进入排队中
+       redisTemplate.boundListOps(SystemConstants.SEC_KILL_USER_QUEUE_KEY).leftPush(seckillStatus);
+
+
+       //进入排队标识
+       redisTemplate.boundHashOps(SystemConstants.SEC_KILL_USER_STATUS_KEY).put(username,seckillStatus);
+
+
+
+       //多线程下单
+       multiThreadingCreateOrder.createrOrder();
+
+       return true;
+   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

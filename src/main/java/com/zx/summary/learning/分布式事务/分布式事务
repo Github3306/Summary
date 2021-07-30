@@ -180,8 +180,8 @@
 
   分布式事务相关代码：
      fescar包中
-     配置文件resource/META_INF：spring.factories
-            resource:file.conf  registry.conf
+     配置文件resource/META_INF：spring.factories    自动配置Fescar相关配置
+            resource:file.conf  registry.conf     Fescar的链接配置及注册中心配置
 
   相关概念讲解
 
@@ -219,7 +219,19 @@
     KEY `idx_unionkey` (`xid`,`branch_id`)
   ) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8;
 
+================================================================================
+4.3 TM和ProxyDataSource
+核心在于对业务sql进行解析，转换成undolog，并同时入库，此时需要创建一个代理数据源，用代理数据源来实现。
 
+要想实现全局事务管理器，需要添加一个@GlobalTransactional注解,该注解需要创建一个解析器，GlobalTransactionScanner,它是一个全局事务扫描器，用来解析带有@GlobalTransactional注解的方法，然后采用AOP的机制控制事务。
+
+每次微服务和微服务之间相互调用,要想控制全局事务，每次TM都会请求TC生成一个XID，每次执行下一个事务，也就是调用其他微服务的时候都需要将该XID传递过去,所以我们可以每次请求的时候，都获取头中的XID，并将XID传递到下一个微服务。
+
+4.3.1 TM和ProxyDataSource实现
+创建FescarAutoConfiguration类
+创建FescarRMRequestFilter，给每个线程绑定一个XID
+创建FescarRestInterceptor过滤器，每次请求其他微服务的时候，都将XID携带过去
+在订单微服务的OrderServiceImpl的add方法上增加@GlobalTransactional(name = “add”)注解
 
 
 
